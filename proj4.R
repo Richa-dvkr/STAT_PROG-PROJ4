@@ -15,6 +15,18 @@ gb <- function(th,k=2) {
 
 ###############################################################################
 ###############################################################################
+#hessian matrix
+hb <- function(th,k=2) {
+  h <- matrix(0,2,2)
+  h[1,1] <- 2-k*2*(2*(th[2]-th[1]**2) - 4*th[1]**2)
+  h[2,2] <- 2*k
+  h[1,2] <- h[2,1] <- -4*k*th[1]
+  h
+}
+
+
+###############################################################################
+###############################################################################
 #newt function
 
 newt=function(theta,func,grad,hess=NULL,...,tol=1e-8,
@@ -35,7 +47,7 @@ newt=function(theta,func,grad,hess=NULL,...,tol=1e-8,
   #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   
   #function to form Hessian Matrix
-  hess=function(theta,grad)
+  hess_created=function(theta,grad)
   {
     hb1 <- grad(theta)             #grad at theta
     Hfd <- matrix(0,length(theta),length(theta))           #finite diference Hessian
@@ -95,7 +107,7 @@ newt=function(theta,func,grad,hess=NULL,...,tol=1e-8,
   
   #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   
-  iter=1   #intialize inter=1
+  iter=0   #intialize inter=1
   
   while(iter<=maxit)       #while loop till maxit
   { 
@@ -118,7 +130,8 @@ newt=function(theta,func,grad,hess=NULL,...,tol=1e-8,
       gradient=grad(theta)      #gradient for theta
       #computes hessian using hess().using pos_func(),it checks if its positive  
       #definite or not if not it converts and returns positive definite hessian
-      Hessian=pos_func(hess(theta,grad))
+      if(is.null(hess)){Hessian=pos_func(hess_created(theta,grad))}
+      else{Hessian=pos_func(hess(theta))}
       
       Hi=chol2inv(chol(Hessian))
       delta=-Hi%*%gradient  #computes delta(stepsize)
@@ -158,12 +171,17 @@ newt=function(theta,func,grad,hess=NULL,...,tol=1e-8,
       }
     #**************************************************
     else #if convergence reached
-    {
+    { 
+      
       g=grad(theta)   #optimal gradient
+      print(grad(theta))
       f=func(theta)   #optimal obj function
       iter=iter       # number ofiteration
       
-      Hessian=hess(theta,grad) #computes hessian
+      #computes hessian
+      if(is.null(hess)){Hessian=hess_created(theta,grad)}
+      else{Hessian=hess(theta)}
+      
       #computes if hessian is positive definite
       res <- try(chol(Hessian),silent = TRUE)
       #checks if res gives error(not positive definite)
@@ -181,6 +199,7 @@ newt=function(theta,func,grad,hess=NULL,...,tol=1e-8,
       return(x)
       
       break  #once convergence find out it breaks the loop
+      
     } 
     
     iter=iter+1  #iter increased by 1
@@ -190,9 +209,15 @@ newt=function(theta,func,grad,hess=NULL,...,tol=1e-8,
 
 
 
-newt(c(10,24),rb,gb)
-newt(c(0,2),rb,gb)
+newt(c(10,2),rb,gb)
+newt(c(10,2),rb,gb,hb)
+
+newt(c(28,4),rb,gb)  
+newt(c(28,4),rb,gb,hb)
+
 newt(c(1,1),rb,gb)  
+newt(c(1,1),rb,gb,hb) 
+
 newt(c(Inf,2),rb,gb)  
 newt(c(1000,08),rb,gb)  
 
