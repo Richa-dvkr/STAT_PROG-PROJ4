@@ -21,19 +21,16 @@ newt=function(theta,func,grad,hess=NULL,...,tol=1e-8,
               fscale=1,maxit=100,max.half=20,eps=1e-6)
 {
   #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  continue=TRUE   #to continue function if objective and derivatives are finite 
   #checks if the objective are not finite at the initial theta;
   if(is.infinite(func(theta)))
   {
-    warning("objective not finite at the initial theta")
-    continue=FALSE   #initialize continues to FALSE
+    stop("objective not finite at the initial theta")
   }
   
   #checks if the derivatives are not finite at the initial theta;
   if(all(is.infinite(grad(theta))))
   {
-      warning("derivatives not finite at the initial theta")
-      continue=FALSE   #initialize continues to FALSE
+    stop("derivatives not finite at the initial theta")
   }
   #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   
@@ -41,7 +38,7 @@ newt=function(theta,func,grad,hess=NULL,...,tol=1e-8,
   hess=function(theta,grad)
   {
     hb1 <- grad(theta)             #grad at theta
-    Hfd <- matrix(0,2,2)           #finite diference Hessian
+    Hfd <- matrix(0,length(theta),length(theta))           #finite diference Hessian
     for (i in 1:length(theta))     #loop over parameters
     {theta_eps <- theta
     theta_eps[i] <- theta_eps[i] + eps   #increase th0[i] by eps      
@@ -60,7 +57,7 @@ newt=function(theta,func,grad,hess=NULL,...,tol=1e-8,
     gradient=grad(theta)   #forms gradient
     for(ele in gradient)   #loop over elements of gradient
     {
-      if(abs(ele)< (fscale + (tol*abs(func(theta)))))  #checks convergence
+      if(abs(ele)< ((fscale + abs(func(theta)))*tol))  #checks convergence
       { result=TRUE}     
       else
       {result=FALSE
@@ -99,104 +96,101 @@ newt=function(theta,func,grad,hess=NULL,...,tol=1e-8,
   #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   
   iter=1   #intialize inter=1
-  if(continue)
-  {
-    while(iter<=maxit)       #while loop till maxit
-    { 
-      #calls convergence function
-      conv_test_val=conv_grad(theta,grad,func,tol,fscale)
+  
+  while(iter<=maxit)       #while loop till maxit
+  { 
+    #calls convergence function
+    conv_test_val=conv_grad(theta,grad,func,tol,fscale)
+    
+    #********************************************
+    #checks if maxit reach without convergence
+    if(iter==maxit && conv_test_val==FALSE)
+    {
+      warning("maxit is reached without convergence")
+      break
+    }
+    
+    #*********************************************
+    #checks convergence
+    if(conv_test_val==FALSE)    #if convergence not reached
+    {
+      obj_old=func(theta)       #obj function value for theta
+      gradient=grad(theta)      #gradient for theta
+      #computes hessian using hess().using pos_func(),it checks if its positive  
+      #definite or not if not it converts and returns positive definite hessian
+      Hessian=pos_func(hess(theta,grad))
       
-      #********************************************
-      #checks if maxit reach without convergence
-      if(iter==maxit && conv_test_val==FALSE)
+      Hi=chol2inv(chol(Hessian))
+      delta=-Hi%*%gradient  #computes delta(stepsize)
+      
+      new_theta=theta+delta    #computes new theta
+      obj_new=func(new_theta)  #computes new obj function value
+      
+      
+      no_step_half=0     #number of steps half
+      
+      while(obj_old<=obj_new)  #iterate till obj_new is less than obj_old
       {
-        warning("maxit is reached without convergence")
+        if(no_step_half<=max.half)   #checks if no_step_half exceeds max.half 
+        {
+          delta=delta/2      #reducing delta by half
+          new_theta=theta+delta    #new theta after reducing
+          obj_new=func(new_theta)  #obj_new after reducing
+          no_step_half=no_step_half+1   #no_step_half increased by 1
+        }
+        else #if no_step_half exceeds max.half we get warning
+        {  
+          warning("the step fails to reduce the objective despite trying
+                  max.half step halvings")
+          break   #terminates loop
+        }
+        
+      }
+      
+      if(obj_new<obj_old)  #if obj_new less than obj_old without any errors
+      { 
+        theta=new_theta
+      }
+      else{
         break
       }
       
-      #*********************************************
-      #checks convergence
-      if(conv_test_val==FALSE)    #if convergence not reached
-      {
-        obj_old=func(theta)       #obj function value for theta
-        gradient=grad(theta)      #gradient for theta
-        #computes hessian using hess().using pos_func(),it checks if its positive  
-        #definite or not if not it converts and returns positive definite hessian
-        Hessian=pos_func(hess(theta,grad))
-        
-        Hi=chol2inv(chol(Hessian))
-        delta=-Hi%*%gradient  #computes delta(stepsize)
-        
-        new_theta=theta+delta    #computes new theta
-        obj_new=func(new_theta)  #computes new obj function value
-        
-        
-        no_step_half=0     #number of steps half
-        
-        while(obj_old<=obj_new)  #iterate till obj_new is less than obj_old
-        {
-          if(no_step_half<=max.half)   #checks if no_step_half exceeds max.half 
-          {
-            delta=delta/2      #reducing delta by half
-            new_theta=theta+delta    #new theta after reducing
-            obj_new=func(new_theta)  #obj_new after reducing
-            no_step_half=no_step_half+1   #no_step_half increased by 1
-          }
-          else #if no_step_half exceeds max.half we get warning
-          {  
-            warning("the step fails to reduce the objective despite trying
-                    max.half step halvings")
-            break   #terminates loop
-          }
-          
-        }
-        
-        if(obj_new<obj_old)  #if obj_new less than obj_old without any errors
-        { 
-          theta=new_theta
-        }
-        else{
-          break
-        }
-        
-        }
-      #**************************************************
-      else #if convergence reached
-      {
-        g=grad(theta)   #optimal gradient
-        f=func(theta)   #optimal obj function
-        iter=iter       # number ofiteration
-        
-        Hessian=hess(theta,grad) #computes hessian
-        #computes if hessian is positive definite
-        res <- try(chol(Hessian),silent = TRUE)
-        #checks if res gives error(not positive definite)
-        if(any(class(res)=="try-error"))  
-        {
-          warning("Hessian matrix is not finte at convergence")
-          x=list(f=f,theta=theta,iter=iter,g=g)  # list to be return
-        }
-        else
-        {
-          Hi=chol2inv(chol(Hessian))
-          x=list(f=f,theta=theta,iter=iter,g=g,Hi=Hi)  # list to be return
-        }
-        
-        return(x)
-        
-        break  #once convergence find out it breaks the loop
-      } 
+      }
+    #**************************************************
+    else #if convergence reached
+    {
+      g=grad(theta)   #optimal gradient
+      f=func(theta)   #optimal obj function
+      iter=iter       # number ofiteration
       
-      iter=iter+1  #iter increased by 1
-    }
+      Hessian=hess(theta,grad) #computes hessian
+      #computes if hessian is positive definite
+      res <- try(chol(Hessian),silent = TRUE)
+      #checks if res gives error(not positive definite)
+      if(any(class(res)=="try-error"))  
+      {
+        warning("Hessian matrix is not finte at convergence")
+        x=list(f=f,theta=theta,iter=iter,g=g)  # list to be return
+      }
+      else
+      {
+        Hi=chol2inv(chol(Hessian))
+        x=list(f=f,theta=theta,iter=iter,g=g,Hi=Hi)  # list to be return
+      }
+      
+      return(x)
+      
+      break  #once convergence find out it breaks the loop
+    } 
+    
+    iter=iter+1  #iter increased by 1
   }
-  else{break} #if continue is FALSE
-
+  
   }
 
 
 
-newt(c(10,.1),rb,gb)
+newt(c(10,24),rb,gb)
 newt(c(0,2),rb,gb)
 newt(c(1,1),rb,gb)  
 newt(c(Inf,2),rb,gb)  
