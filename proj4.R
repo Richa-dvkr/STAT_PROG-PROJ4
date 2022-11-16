@@ -102,8 +102,7 @@ newt=function(theta,func,grad,hess=NULL,...,tol=1e-8,
       return(mat_2)  #returns positive definite matrix
     }
   }
-  
-}  
+    
   #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   iter=0   #intialize inter=1
