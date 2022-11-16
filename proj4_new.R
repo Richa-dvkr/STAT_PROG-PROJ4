@@ -81,6 +81,40 @@ newt=function(theta,func,grad,hess=NULL,...,tol=1e-8,
   }
   
   #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  #function to form inverse of matrix
+  
+  #function to find minors
+  minor <- function(mat){
+    rows <- dim(mat)[1]  #number of rows of matrix  
+    cols <- dim(mat)[2]  #number of columns of matrix 
+    minor <- matrix(0,nrow=rows,ncol=cols)      #creating empty minor matrix
+    for (r in range(1,rows)){      #looping over rows
+      for (c in range(1,cols)){    #looping over columns
+        minor[r,c] = mat[-r,-c]}}  #finding minors
+    return(minor)    #returns minor
+  }
+  
+  #function to find cofactors
+  cofactor <- function(mat){
+    rows <- dim(mat)[1]  #number of rows of matrix 
+    cols <- dim(mat)[2]  #number of columns of matrix
+    cofac <- matrix(0,nrow=rows,ncol=cols)      #creating empty cofactors matrix
+    for (r in range(1,rows)){         #looping over rows
+      for (c in range(1,cols)){       #looping over columns
+        e <- (r+c)          #sum of index
+        cofac[r,c] = ((-1) ** e) * minor(mat)[r,c]}}  #finds cofactors
+    return(cofac)   #returns cofactors
+  }
+  
+  #function to find inverse
+  inverse <- function(mat){
+    cofac_t <- t(cofactor(mat))   #cofactor transpose
+    inv <- cofac_t /det(mat)      #inverse matrix formula
+    return(inv)     #returns inverse
+  }
+  
+  
+  #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   
   #function check if hessian is positive finite and convert to positive
   #definite if not
@@ -131,9 +165,10 @@ newt=function(theta,func,grad,hess=NULL,...,tol=1e-8,
       if(is.null(hess)){Hessian=pos_func(hess_created(theta,grad,...))}
       else{Hessian=pos_func(hess(theta,...))}
       
-      Hi=chol2inv(chol(Hessian))
-      delta=-Hi%*%gradient  #computes delta(stepsize)
       
+      Hi=inverse(Hessian)
+      delta=-Hi%*%gradient  #computes delta(stepsize)
+
       new_theta=theta+delta    #computes new theta
       obj_new=func(new_theta)  #computes new obj function value
       
@@ -142,7 +177,7 @@ newt=function(theta,func,grad,hess=NULL,...,tol=1e-8,
       while(obj_old<=obj_new)  #iterate till obj_new is less than obj_old
       {
         if(no_step_half<=max.half)   #checks if no_step_half exceeds max.half 
-        {
+        { 
           delta=delta/2      #reducing delta by half
           new_theta=theta+delta    #new theta after reducing
           obj_new=func(new_theta,...)  #obj_new after reducing
@@ -179,7 +214,7 @@ newt=function(theta,func,grad,hess=NULL,...,tol=1e-8,
         }
       else
         {
-          Hi=chol2inv(chol(Hessian))
+          Hi=inverse(Hessian)
           x=list(f=f,theta=theta,iter=iter,g=g,Hi=Hi)  # list to be return
           return(x)
         }
@@ -194,12 +229,12 @@ newt=function(theta,func,grad,hess=NULL,...,tol=1e-8,
 
 
 
-newt(c(10,2),rb,gb,k=1)
+newt(c(0,2),rb,gb,k=1)
 
-newt(c(10,2),rb,gb,hb,k=1)
+newt(c(0,2),rb,gb,hb,k=1)
 
-newt(c(10,.1),rb,gb)
-newt(c(10,.1),rb,gb,hb)
+newt(c(10,2),rb,gb,k=2)
+newt(c(10,2),rb,gb,hb,k=2)
 
 
 newt(c(28,4),rb,gb)  
