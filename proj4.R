@@ -80,4 +80,28 @@ newt=function(theta,func,grad,hess=NULL,...,tol=1e-8,
     return(result)    #returns result
   }
   
+  pos_func=function(mat2)
+  { 
+    identity_mat = diag(NCOL(mat2))  #gets identity matrix
+    i=eps     #lamda value intitiated to 1
+    # res will gives error if matrix is not positive definite
+    res <- try(chol(mat2),silent = TRUE) 
+    if(any(class(res)!="try-error")) #checks if res gives error
+    {
+      return(mat2)   #if not it returns original matrix
+    }
+    else   #if it gives error--> not positive definite
+    {
+      while (any(class(res)=="try-error"))  #loops until its positive definite
+      { 
+        mat2=(mat2+t(mat2))/2
+        mat_2=mat2+i*identity_mat    #adds a multiple of the identity matrix
+        i=i*10                       #increase i(lamda) by 1
+        res <- try(chol(mat_2),silent = TRUE)  #computes result
+      }
+      return(mat_2)  #returns positive definite matrix
+    }
+  }
+  
+}  
   #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
