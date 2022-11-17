@@ -226,7 +226,7 @@ newt=function(theta,func,grad,hess=NULL,...,tol=1e-8,
       no_step_half = 0    # Initialize the number of step half
       
       # Checks if Delta overshoots and increases the objective function or 
-      # objective function is infinite.
+      # objective function is not finite.
       
       while(obj_old<=obj_new || is.finite(obj_new)==FALSE )  
       {
