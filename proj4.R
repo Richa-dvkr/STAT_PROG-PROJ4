@@ -135,7 +135,7 @@ newt=function(theta,func,grad,hess=NULL,...,tol=1e-8,
       obj_new=func(new_theta)  #computes new obj function value
       
       no_step_half=0     #number of steps half
-      while(obj_old<=obj_new)  #iterate till obj_new is less than obj_old
+      while(obj_old<=obj_new || is.infinite(obj_new) )  #iterate till obj_new is less than obj_old
       {
         if(no_step_half<=max.half)   #checks if no_step_half exceeds max.half 
         {
