@@ -61,13 +61,13 @@ newt=function(theta,func,grad,hess=NULL,...,tol=1e-8,
   
   #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   #checks if the objectives are not finite at the initial theta;
-  if(is.infinite(func(theta,...)))
+  if(is.finite(func(theta,...))==FALSE)
   {
     stop("objective not finite at the initial theta")
   }
   
   #checks if the derivatives are not finite at the initial theta;
-  if(all(is.infinite(grad(theta,...))))
+  if(all(is.finite(grad(theta,...)))==FALSE)
   {
     stop("derivatives not finite at the initial theta")
   }
@@ -228,7 +228,7 @@ newt=function(theta,func,grad,hess=NULL,...,tol=1e-8,
       # Checks if Delta overshoots and increases the objective function or 
       # objective function is infinite.
       
-      while(obj_old<=obj_new || is.infinite(obj_new) )  
+      while(obj_old<=obj_new || is.finite(obj_new)==FALSE )  
       {
         if(no_step_half<=max.half)   #checks if no_step_half exceeds max.half 
         {
@@ -314,4 +314,8 @@ hb <- function(th,k=2) {
 
 newt(c(10,2),rb,gb,k=1)
 newt(c(10,2),rb,gb,hb,k=1)
+
+newt(c(0,2),rb,gb,k=1)
+newt(c(0,2),rb,gb,hb,k=1)
+
 
