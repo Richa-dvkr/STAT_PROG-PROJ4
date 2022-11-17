@@ -35,7 +35,7 @@
 #--------------------------------Description------------------------------------
 
 #In the following code file, the newton method's for minimization of functions
-#has been implemented.For this a function named newt has been implemented. inside
+#has been implemented.For this a function named newt has been implemented. Inside
 #the newt function we have also implemented functions to find the hessian
 #matrix(if not passed by the user),to check whether the convergence of the function
 #and a function to check whether the hessian is positive definite or not and if 
@@ -48,35 +48,37 @@ newt=function(theta,func,grad,hess=NULL,...,tol=1e-8,
 { 
   # Overview;
   
-  #We first pass initial theta we check whether the value of the object function 
-  #and gradient function at theta is finite or not. If it is not finite then we
-  #stop the function and return an error. 
-  #If it is finite then we continue with the function. Now we check for whether 
-  #is convergent or not using conv_grad function. If convergence has not been reached
-  #but we have reached the maximum number of iterations then we stop the process 
-  #and return an error stating that maximum iteration have been reached but the 
-  #gradient is still not convergent else we continue with the function. After this 
-  #we compute the hessian matrix(we don't do this if the hessian is already provided 
-  #by the user) and check whether it is positive definite or not using pos_func 
-  #funtion(if the Matrix is not positive definite then it converts it into a 
-  #positive definite matrix and returns the new matrix so that now we have a positive
-  #definite matrix). Now we perform cholesky decomposition of the hessian matrix
-  #and compute its inverse. After this we define a variable new_theta which is
-  #basically the updated value of theta i.e theta+delta. We consider 2 cases - 
-  #a case in which delta might overshoot and a case in which it doesn't overshoot
-  #in th overshoot  we half the value of delta and do this for max_half number of 
-  #times otherwise we return error. we update theta value with new theta that  
-  #prevents it from overshootung. In other case where delta doesn't overshoot 
-  #we simply assign theta as theta+delta
+  #We first pass initial theta and check whether the value of the objective 
+  #function and gradient function at theta is finite or not. If it is not finite 
+  #then we stop the function and return an error.
+  #If it is finite then we continue with the function. Now we check whether 
+  #its convergent or not using conv_grad function. If convergence has not been 
+  #reached but we have reached the maximum number of iterations, then we stop  
+  #the process and return an error stating that maximum iteration have been 
+  #reached but the gradient is still not convergent.Else we continue with the 
+  #function.
+  #After this, we compute the hessian matrix(we don't do this if the hessian is 
+  #already provided by the user) and check whether it is positive definite or  
+  #not using pos_func (if the Matrix is not positive definite then it converts 
+  #it into a positive definite matrix and returns the new matrix so that now we 
+  #have a positive definite matrix). Then, we perform cholesky decomposition of 
+  #the hessian matrix and compute its inverse. After this we define a variable 
+  #new_theta which is basically the updated value of theta i.e theta+delta. 
+  #We consider 2 cases - a case in which delta might overshoot and a case in 
+  #which it doesn't overshoot. 
+  #In the overshoot case, we half the value of delta and do this for max_half 
+  #number of times otherwise we return error. We then update theta value with  
+  #new theta that prevents it from overshooting. 
+  #In other case where delta doesn't overshoot, we simply assign theta as 
+  #theta+delta
   
   #When convergence is reached we check if hessian is positive definite or not
-  # If it is it computes inverse using cholskey decompositon and we return 
-  # a list 'x' otherwise stops the function with an error. 
-  
+  #If it is, then it computes inverse using cholskey decomposition and we return 
+  #a list 'x' otherwise stops the function with an error. 
   
   #Arguments
   
-  #theta : vector of initial values for the optimization parameters.
+  #theta :  Vector of initial values for the optimization parameters.
   
   #func   : The objective function to minimize. Its first argument is the vector 
   #         of optimization parameters. Remaining arguments are passed from newt 
@@ -151,15 +153,15 @@ newt=function(theta,func,grad,hess=NULL,...,tol=1e-8,
   #Returns
   #Hfd    : Hessian matrix 
     
-    hb1 <- grad(theta,...)             #grad at theta
+    hb1 <- grad(theta,...)                           #grad at theta
     Hfd <- matrix(0,length(theta),length(theta))     #finite difference Hessian
-    for (i in 1:length(theta))      #loop over parameters
+    for (i in 1:length(theta))                       #loop over parameters
     {theta_eps <- theta
     theta_eps[i] <- theta_eps[i] + eps   #increase th0[i] by eps      
-    hb2 <- grad(theta_eps,...)               #grad at theta
+    hb2 <- grad(theta_eps,...)           #grad at theta
     Hfd[i,] <- (hb2 - hb1)/eps           #approximate second derivatives
     }
-    return(Hfd)      #returns hessian matrix
+    return(Hfd)                          #returns hessian matrix
   }
   
   
@@ -224,12 +226,12 @@ newt=function(theta,func,grad,hess=NULL,...,tol=1e-8,
   #Returns
   #new_matrix/matrix : Positive definite matrix
   
-    identity_mat = diag(NCOL(matrix))  #gets identity matrix
+    identity_mat = diag(NCOL(matrix))    #gets identity matrix
     #multiplier value intitiated to 1e-9 times norm(matrix)
     multiplier=norm(matrix)*1e-9              
     # res will give error if matrix is not positive definite
     res <- try(chol(matrix),silent = TRUE) 
-    if(any(class(res)!="try-error")) #checks if res gives error
+    if(any(class(res)!="try-error"))     #checks if res gives error
     {
       return(matrix)   #if not it returns original/positive definite matrix
     }
@@ -275,12 +277,12 @@ newt=function(theta,func,grad,hess=NULL,...,tol=1e-8,
       else{Hessian = pos_func(hess(theta,...))}
       
       Hi=chol2inv(chol(Hessian)) # Get inverse of hessian matrix.
-      delta = -Hi%*%gradient  #computes delta
+      delta = -Hi%*%gradient     #computes delta
       
-      new_theta=theta+delta    #computes new theta
-      obj_new=func(new_theta)  #computes new objective function value
+      new_theta=theta+delta      #computes new theta
+      obj_new=func(new_theta)    #computes new objective function value
       
-      no_step_half = 0    # Initialize the number of step half
+      no_step_half = 0           # Initialize the number of step half
       
       # Checks if Delta overshoots and increases the objective function or 
       # objective function is not finite.
@@ -289,9 +291,9 @@ newt=function(theta,func,grad,hess=NULL,...,tol=1e-8,
       {
         if(no_step_half<=max.half)   #checks if no_step_half exceeds max.half 
         {
-          delta=delta/2      #reducing delta by half
-          new_theta=theta+delta    #new theta after reducing
-          obj_new=func(new_theta,...)  #obj_new after reducing
+          delta=delta/2                 #reducing delta by half
+          new_theta=theta+delta         #new theta after reducing
+          obj_new=func(new_theta,...)   #obj_new after reducing
           no_step_half=no_step_half+1   #no_step_half increased by 1
         }
         else #if no_step_half exceeds max.half, function stops with error.
@@ -308,7 +310,7 @@ newt=function(theta,func,grad,hess=NULL,...,tol=1e-8,
     { 
       g=grad(theta,...)   #optimal gradient
       f=func(theta,...)   #optimal obj function
-      iter=iter       # number of iterations
+      iter=iter           #number of iterations
       
       #computes hessian
       if(is.null(hess))
@@ -331,7 +333,7 @@ newt=function(theta,func,grad,hess=NULL,...,tol=1e-8,
           return(x)
         }
         
-      break  #once convergence is found, it breaks the loop
+      break      #once convergence is found, it breaks the loop
     } 
     
     iter=iter+1  #iter increased by 1
