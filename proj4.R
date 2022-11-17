@@ -1,10 +1,61 @@
-###############################################################################
-###############################################################################
-#newt function
 
+#------------------------------Newton Optimizer---------------------------------
+
+#--------------------------------Description------------------------------------
+
+#In the following code file, the newton method's for minimization of functions
+#has been implemented.For this a function named newt has been implemented. Along
+#with the newt function we have also implemented functions to find the hessian
+#matrix(if not passed by the user),to check whether the convergence of the function
+#and a function to check whether the hessian is positive definite or not and if 
+#it is not positive definite it converts it into a positive definite matrix
+
+#--------------------------------------CODE-------------------------------------
+#newt function
 newt=function(theta,func,grad,hess=NULL,...,tol=1e-8,
               fscale=1,maxit=100,max.half=20,eps=1e-6)
 { 
+  #Arguements
+  
+  # theta : vector of initial values for the optimization parameters.
+  
+  #func   : The objective function to minimize. Its first argument is the vector 
+  #         of optimization parameters. Remaining arguments are passed from newt 
+  #         using '...'
+  
+  #grad   : The gradient function. It has the same arguments as func but returns 
+  #         the gradient vector of the objective w.r.t. the elements of parameter 
+  #         vector
+  
+  #hess   : the Hessian matrix function. It has the same arguments as func but 
+  #         returns the Hessian matrix of the objective w.r.t. the elements of 
+  #         parameter vector. If not supplied then newt should obtain an 
+  #         approximation to the Hessian by finite differencing of the gradient vector
+  #         Default : NULL
+  
+  #tol    : convergence tolerance. Default = 1e-8
+  
+  #fscale : a rough estimate of the magnitude of func near the optimum - 
+  #         used in convergence testing.Default = 1
+  
+  #maxit  : the maximum number of Newton iterations to try before giving up.
+  #         Default = 100
+  
+  #maxit  : the maximum number of times a step should be halved before concluding
+  #         that the step has failed to improve the objective. Default = 20
+  
+  #eps    : the finite difference intervals to use when a Hessian function is not provided
+  #         Default: 1e-6
+  
+  #Returns
+  # x     : a list containing
+  #       f     : value of the objective function at the minimum.
+  #       theta : the value of the parameters at the minimum
+  #       iter  : the number of iterations taken to reach minimum
+  #       g     : the gradient vector at the minimum
+  #       Hi    : the inverse of the hessian matrix at the minimum
+  
+  
   
   #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   #checks if the objective are not finite at the initial theta;
