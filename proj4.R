@@ -22,12 +22,12 @@
 #Medha Ranga:
 #-->Function to create hessian matrix.
 #-->code when convergence is reached.
-#-->comments +overview
+#-->comments + overview
 
 #Saksham Joshi
 #-->Function to create positive definite matrix.
 #-->convergence check function.
-#-->comments +overview
+#-->comments + overview
 
 
 #------------------------------Newton Optimizer---------------------------------
@@ -46,6 +46,51 @@
 newt=function(theta,func,grad,hess=NULL,...,tol=1e-8,
               fscale=1,maxit=100,max.half=20,eps=1e-6)
 { 
+  # Overview;
+  # we pass initial theta and for that we are checking if obj fucntion and gradient func
+  # is finite
+  # check for convergence using conv_grad
+  #agr convergence reach nahi kari toh check kar ki kya iter==maxit hai 
+  # haan toh stop kardo varna
+  # calculate value of onbj function and gradient func at theta
+  #Calculate hessian matrix(if not provided by the user) using finite differencing
+  # where step = eps
+  #check if hessian is pos definite using pos_function
+  #perform cholesky decomposition and find inverse
+  #update theta by adding value delta in theta
+  # we consider 2 case : delta overshoots and delta doesnt overshoot
+  #check in while loop - if overshooting - divide delta by 2 adn find new_theta
+  #otherwise theta = new_theta = theta+delta and we check again for convergence
+  #If we have reached convergence, check if hessian if pos_Definite if no then we stop 
+  #and give an error >otherwise we compute the inverse of the hessian and return list x
+  
+  #We first pass initial theta we check whether the value of the object function 
+  #and gradient function at theta is finite or not. If it is not finite then we
+  #stop the function and return an error. 
+  #If it is finite then we continue with the function. Now we check for whether 
+  #is convergent or not using conv_grad function. If convergence has not been reached
+  #but we have reached the maximum number of iterations then we stop the process 
+  #and return an error stating that maximum iteration have been reached but the 
+  #gradient is still not convergent else we continue with the function. After this 
+  #we compute the hessian matrix(we don't do this if the hessian is already provided 
+  #by the user) and check whether it is positive definite or not using pos_func 
+  #funtion(if the function is not positive definite then it converts it into a 
+  #positive definite matrix and returns the new matrix so that now we have a positive
+  #definite matrix). Now we perform cholesky decomposition of the hessian matrix
+  #and compute its inverse. After this we define a varibale new_theta which is
+  #basically the updated value of theta i.e theta+delta. We consider 2 cases - 
+  #a case in which delta ight overshoot and a case in which it doesn't overshoot
+  #in th overshoot  we half the value of delta and do this for max_half number of times
+  #In each iteration we compute the value of the objective function. If it still
+  #overshoots we stop the function and return an error otherwise we update it with
+  #that value of delta and theta that prevents it from overshootung. In the case
+  #where delta doesn't overshoot we simply assign theta as theta+delta
+  
+  #When convergence is reached we compute the inverse of the hessian matrix by
+  #cholesky decomposition. If the decompositon is not possile we stop the function 
+  #and return an error. Otherwise we return a list 'x' 
+  
+  
   #Arguments
   
   #theta : vector of initial values for the optimization parameters.
@@ -207,9 +252,9 @@ newt=function(theta,func,grad,hess=NULL,...,tol=1e-8,
     }
     else   #if it gives error--> not positive definite
     {
+      matrix=(matrix+t(matrix))/2  # converts into symmetric matrix
       while (any(class(res)=="try-error"))  #loops until its positive definite
       { 
-        matrix=(matrix+t(matrix))/2  # converts into symmetric matrix
         # adds a multiple of the identity matrix
         new_matrix = matrix+multiplier*identity_mat  
         #increase multiplier 10 times 
@@ -228,8 +273,6 @@ newt=function(theta,func,grad,hess=NULL,...,tol=1e-8,
   { 
     #calls convergence function
     conv_test_val=conv_grad(theta,grad,func,tol,fscale,...)
-    
-    #*********************************************
     #checks convergence
     if(conv_test_val==FALSE)    #if convergence not reached
     { 
@@ -276,8 +319,8 @@ newt=function(theta,func,grad,hess=NULL,...,tol=1e-8,
       }
       theta=new_theta   # initialize theta as new_theta.
       
-      }}
-    #**************************************************
+      }
+    }
     else #if convergence is reached
     { 
       g=grad(theta,...)   #optimal gradient
@@ -285,9 +328,11 @@ newt=function(theta,func,grad,hess=NULL,...,tol=1e-8,
       iter=iter       # number of iterations
       
       #computes hessian
-      if(is.null(hess)){Hessian=hess_created(theta,grad,...)}
+      if(is.null(hess))
+      {
+        Hessian=hess_created(theta,grad,...)
+      }
       else{Hessian=hess(theta,...)}
-      
       #computes if hessian is positive definite
       res <- try(chol(Hessian),silent = TRUE)
       #checks if res gives error(not positive definite)
