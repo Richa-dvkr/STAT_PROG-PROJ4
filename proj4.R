@@ -1,3 +1,34 @@
+#------------------------------------------------------------------------------
+
+#Richa Suresh Divkar : S2335095
+#Medha Ranga : S2417159
+#Saksham Joshi : S2435635
+
+#------------------------------------------------------------------------------
+
+#Github Repo
+#https://github.com/Richa-dvkr/STAT_PROG-PROJ4.git
+
+#------------------------------------------------------------------------------
+
+#Contribution
+
+#Richa Suresh Divkar: 
+#-->Function to create hessian matrix.
+#-->convergence check function.
+#-->code when convergence is not reached.
+#-->comments
+
+#Medha Ranga:
+#-->Function to create hessian matrix.
+#-->code when convergence is reached.
+#-->comments +overview
+
+#Saksham Joshi
+#-->Function to create positive definite matrix.
+#-->convergence check function.
+#-->comments +overview
+
 
 #------------------------------Newton Optimizer---------------------------------
 
