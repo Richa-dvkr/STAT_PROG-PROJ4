@@ -35,8 +35,8 @@
 #--------------------------------Description------------------------------------
 
 #In the following code file, the newton method's for minimization of functions
-#has been implemented.For this a function named newt has been implemented. Along
-#with the newt function we have also implemented functions to find the hessian
+#has been implemented.For this a function named newt has been implemented. inside
+#the newt function we have also implemented functions to find the hessian
 #matrix(if not passed by the user),to check whether the convergence of the function
 #and a function to check whether the hessian is positive definite or not and if 
 #it is not positive definite it converts it into a positive definite matrix
@@ -47,22 +47,6 @@ newt=function(theta,func,grad,hess=NULL,...,tol=1e-8,
               fscale=1,maxit=100,max.half=20,eps=1e-6)
 { 
   # Overview;
-  # we pass initial theta and for that we are checking if obj fucntion and gradient func
-  # is finite
-  # check for convergence using conv_grad
-  #agr convergence reach nahi kari toh check kar ki kya iter==maxit hai 
-  # haan toh stop kardo varna
-  # calculate value of onbj function and gradient func at theta
-  #Calculate hessian matrix(if not provided by the user) using finite differencing
-  # where step = eps
-  #check if hessian is pos definite using pos_function
-  #perform cholesky decomposition and find inverse
-  #update theta by adding value delta in theta
-  # we consider 2 case : delta overshoots and delta doesnt overshoot
-  #check in while loop - if overshooting - divide delta by 2 adn find new_theta
-  #otherwise theta = new_theta = theta+delta and we check again for convergence
-  #If we have reached convergence, check if hessian if pos_Definite if no then we stop 
-  #and give an error >otherwise we compute the inverse of the hessian and return list x
   
   #We first pass initial theta we check whether the value of the object function 
   #and gradient function at theta is finite or not. If it is not finite then we
@@ -74,21 +58,20 @@ newt=function(theta,func,grad,hess=NULL,...,tol=1e-8,
   #gradient is still not convergent else we continue with the function. After this 
   #we compute the hessian matrix(we don't do this if the hessian is already provided 
   #by the user) and check whether it is positive definite or not using pos_func 
-  #funtion(if the function is not positive definite then it converts it into a 
+  #funtion(if the Matrix is not positive definite then it converts it into a 
   #positive definite matrix and returns the new matrix so that now we have a positive
   #definite matrix). Now we perform cholesky decomposition of the hessian matrix
-  #and compute its inverse. After this we define a varibale new_theta which is
+  #and compute its inverse. After this we define a variable new_theta which is
   #basically the updated value of theta i.e theta+delta. We consider 2 cases - 
-  #a case in which delta ight overshoot and a case in which it doesn't overshoot
-  #in th overshoot  we half the value of delta and do this for max_half number of times
-  #In each iteration we compute the value of the objective function. If it still
-  #overshoots we stop the function and return an error otherwise we update it with
-  #that value of delta and theta that prevents it from overshootung. In the case
-  #where delta doesn't overshoot we simply assign theta as theta+delta
+  #a case in which delta might overshoot and a case in which it doesn't overshoot
+  #in th overshoot  we half the value of delta and do this for max_half number of 
+  #times otherwise we return error. we update theta value with new theta that  
+  #prevents it from overshootung. In other case where delta doesn't overshoot 
+  #we simply assign theta as theta+delta
   
-  #When convergence is reached we compute the inverse of the hessian matrix by
-  #cholesky decomposition. If the decompositon is not possile we stop the function 
-  #and return an error. Otherwise we return a list 'x' 
+  #When convergence is reached we check if hessian is positive definite or not
+  # If it is it computes inverse using cholskey decompositon and we return 
+  # a list 'x' otherwise stops the function with an error. 
   
   
   #Arguments
@@ -388,10 +371,6 @@ hb <- function(th,k=2) {
 ###############################################################################
 ###############################################################################
 
-newt(c(10,2),rb,gb,k=1)
-newt(c(10,2),rb,gb,hb,k=1)
 
-newt(c(0,2),rb,gb,k=1)
-newt(c(0,2),rb,gb,hb,k=1)
 
 
