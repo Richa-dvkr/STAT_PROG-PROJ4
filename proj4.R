@@ -152,10 +152,11 @@ newt=function(theta,func,grad,hess=NULL,...,tol=1e-8,
   pos_func = function(matrix)
   { 
   # First, we create Identity matrix of given matrix size. Then, considering
-  # multiplier as 1e-6, we check if matrix is positive definite. If it is 
-  # positive definite, it returns the matrix. Otherwise, it adds a multiple of 
-  # the identity matrix until it's positive definite where we increase the 
-  # multiplier 10 times norm(matrix) and returns New matrix (Positive definite)
+  # multiplier as small multiple (1e-9) of matrix norm, we check if matrix 
+  # is positive definite. If it is positive definite, it returns the matrix.
+  # Otherwise, it adds a multiple of the identity matrix until it's positive
+  # definite where we increase the multiplier 10 times and returns 
+  # New matrix (Positive definite)
   
   
   #Arguments
@@ -165,7 +166,8 @@ newt=function(theta,func,grad,hess=NULL,...,tol=1e-8,
   #new_matrix/matrix : Positive definite matrix
   
     identity_mat = diag(NCOL(matrix))  #gets identity matrix
-    multiplier=1e-6                    #multiplier value intitiated to 1e-6
+    #multiplier value intitiated to 1e-9 times norm(matrix)
+    multiplier=norm(matrix)*1e-9              
     # res will give error if matrix is not positive definite
     res <- try(chol(matrix),silent = TRUE) 
     if(any(class(res)!="try-error")) #checks if res gives error
@@ -179,8 +181,8 @@ newt=function(theta,func,grad,hess=NULL,...,tol=1e-8,
         matrix=(matrix+t(matrix))/2  # converts into symmetric matrix
         # adds a multiple of the identity matrix
         new_matrix = matrix+multiplier*identity_mat  
-        #increase multiplier 10 times norm(matrix)
-        multiplier = multiplier*10*norm(matrix)     
+        #increase multiplier 10 times 
+        multiplier = multiplier*10     
         res <- try(chol(new_matrix),silent = TRUE)  #computes result
       }
       return(new_matrix)  #returns positive definite matrix
